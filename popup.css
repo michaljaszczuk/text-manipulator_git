@@ -1,21 +1,59 @@
 :root {
-    --bg-color: #f8f9fa;
-    --text-color: #212529;
-    --primary-color: #007bff;
-    --primary-hover-color: #0056b3;
-    --border-color: #dee2e6;
-    --light-gray-color: #e9ecef;
-    --white-color: #ffffff;
     --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    
+    /* Light Theme Variables */
+    --bg-color-light: #f8f9fa;
+    --text-color-light: #212529;
+    --primary-color-light: #007bff;
+    --primary-hover-light: #0056b3;
+    --border-color-light: #dee2e6;
+    --secondary-bg-color-light: #e9ecef;
+    --widget-bg-color-light: #ffffff;
+    --button-hover-bg-light: #e9ecef;
+    --icon-color-light: #495057;
+
+    /* Dark Theme Variables */
+    --bg-color-dark: #202124;
+    --text-color-dark: #e8eaed;
+    --primary-color-dark: #8ab4f8;
+    --primary-hover-dark: #a1c3fa;
+    --border-color-dark: #5f6368;
+    --secondary-bg-color-dark: #3c4043;
+    --widget-bg-color-dark: #2d2e30;
+    --button-hover-bg-dark: #4d5054;
+    --icon-color-dark: #bdc1c6;
 }
 
 body {
+    --bg-color: var(--bg-color-light);
+    --text-color: var(--text-color-light);
+    --primary-color: var(--primary-color-light);
+    --primary-hover-color: var(--primary-hover-light);
+    --border-color: var(--border-color-light);
+    --secondary-bg-color: var(--secondary-bg-color-light);
+    --widget-bg-color: var(--widget-bg-color-light);
+    --button-hover-bg: var(--button-hover-bg-light);
+    --icon-color: var(--icon-color-light);
+
     font-family: var(--font-family);
     background-color: var(--bg-color);
     color: var(--text-color);
     margin: 0;
     width: 450px;
     font-size: 14px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+body[data-theme='dark'] {
+    --bg-color: var(--bg-color-dark);
+    --text-color: var(--text-color-dark);
+    --primary-color: var(--primary-color-dark);
+    --primary-hover-color: var(--primary-hover-dark);
+    --border-color: var(--border-color-dark);
+    --secondary-bg-color: var(--secondary-bg-color-dark);
+    --widget-bg-color: var(--widget-bg-color-dark);
+    --button-hover-bg: var(--button-hover-bg-dark);
+    --icon-color: var(--icon-color-dark);
 }
 
 .container {
@@ -31,10 +69,17 @@ header {
     align-items: center;
 }
 
+.header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 h1 {
     font-size: 18px;
     margin: 0;
     color: var(--primary-color);
+    transition: color 0.2s;
 }
 
 textarea {
@@ -47,41 +92,46 @@ textarea {
     font-size: 13px;
     resize: vertical;
     box-sizing: border-box;
+    background-color: var(--widget-bg-color);
+    color: var(--text-color);
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
 
 textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 25%, transparent);
 }
 
 #stats-panel {
     display: flex;
     justify-content: space-around;
-    background-color: var(--light-gray-color);
+    background-color: var(--secondary-bg-color);
     padding: 8px;
     border-radius: 6px;
     font-size: 12px;
+    transition: background-color 0.2s;
 }
 
 #stats-panel span {
-    color: #6c757d;
+    color: color-mix(in srgb, var(--text-color) 70%, transparent);
 }
 
 #stats-panel strong {
     color: var(--text-color);
 }
 
-/* Tabs */
 .tabs {
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    background-color: var(--white-color);
+    background-color: var(--widget-bg-color);
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
 .tab-nav {
     display: flex;
     border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.2s;
 }
 
 .tab-link {
@@ -92,16 +142,18 @@ textarea:focus {
     cursor: pointer;
     text-align: center;
     font-size: 14px;
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.2s, color 0.2s, border-bottom-color 0.2s;
     border-bottom: 2px solid transparent;
+    color: var(--text-color);
 }
 
 .tab-link:not(:last-child) {
     border-right: 1px solid var(--border-color);
+    transition: border-color 0.2s;
 }
 
 .tab-link:hover {
-    background-color: var(--light-gray-color);
+    background-color: var(--button-hover-bg);
 }
 
 .tab-link.active {
@@ -125,7 +177,6 @@ textarea:focus {
     to { opacity: 1; }
 }
 
-/* Feature Groups */
 .feature-group {
     display: flex;
     flex-direction: column;
@@ -135,6 +186,7 @@ textarea:focus {
     margin-bottom: 16px;
     padding-bottom: 16px;
     border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.2s;
 }
 
 .feature-grid {
@@ -147,10 +199,16 @@ label {
     font-weight: 500;
 }
 
+input[type="text"], input[type="number"], input[type="checkbox"] {
+    background-color: var(--widget-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
 input[type="text"], input[type="number"] {
     width: 100%;
     padding: 8px;
-    border: 1px solid var(--border-color);
     border-radius: 4px;
     box-sizing: border-box;
 }
@@ -173,28 +231,24 @@ input[type="text"], input[type="number"] {
     font-weight: normal;
 }
 
-/* Buttons */
 button {
     border-radius: 5px;
     border: 1px solid var(--border-color);
     padding: 8px 12px;
     font-size: 13px;
     cursor: pointer;
-    transition: background-color 0.2s;
-    background-color: var(--white-color);
+    background-color: var(--widget-bg-color);
+    color: var(--text-color);
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 button:hover {
-    background-color: var(--light-gray-color);
-}
-
-.storage-buttons button {
-    border: 1px solid var(--border-color);
+    background-color: var(--button-hover-bg);
 }
 
 .apply-btn {
     background-color: var(--primary-color);
-    color: var(--white-color);
+    color: var(--bg-color); /* High contrast text */
     border-color: var(--primary-color);
     font-weight: 500;
 }
@@ -210,10 +264,18 @@ button:hover {
 }
 #clear-text-btn:hover {
     background-color: #dc3545;
-    color: var(--white-color);
+    color: #fff;
 }
 
-.storage-buttons {
+#theme-switcher {
+    padding: 6px;
     display: flex;
-    gap: 8px;
+    align-items: center;
+    justify-content: center;
 }
+
+#theme-switcher svg {
+    stroke: var(--icon-color);
+    transition: stroke 0.2s;
+}
+

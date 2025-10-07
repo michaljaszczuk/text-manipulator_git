@@ -6,8 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyButtons = document.querySelectorAll('.apply-btn');
     const clearButton = document.getElementById('clear-text-btn');
     const saveButton = document.getElementById('save-text-btn');
+    const themeSwitcher = document.getElementById('theme-switcher');
+    const sunIcon = document.getElementById('theme-icon-sun');
+    const moonIcon = document.getElementById('theme-icon-moon');
 
-    // Referencje do statystyk
     const stats = {
         chars: document.getElementById('stat-chars'),
         words: document.getElementById('stat-words'),
@@ -15,9 +17,33 @@ document.addEventListener('DOMContentLoaded', () => {
         sentences: document.getElementById('stat-sentences'),
     };
 
-    // --- Inicjalizacja ---
+    // --- Zarządzanie motywem ---
+    const setTheme = (theme) => {
+        document.body.setAttribute('data-theme', theme);
+        if (theme === 'dark') {
+            moonIcon.style.display = 'none';
+            sunIcon.style.display = 'block';
+        } else {
+            moonIcon.style.display = 'block';
+            sunIcon.style.display = 'none';
+        }
+        chrome.storage.local.set({ theme: theme });
+    };
 
-    // Wczytaj zapisany tekst przy starcie
+    const toggleTheme = () => {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+    };
+
+    const loadTheme = () => {
+        chrome.storage.local.get(['theme'], (result) => {
+            const savedTheme = result.theme || 'dark'; // Domyślnie ciemny
+            setTheme(savedTheme);
+        });
+    };
+
+    // --- Zarządzanie tekstem ---
     const loadText = () => {
         chrome.storage.local.get(['savedText'], (result) => {
             if (result.savedText) {
@@ -32,8 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Zarządzanie stanem UI ---
-
-    // Przełączanie zakładek
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             tabs.forEach(t => t.classList.remove('active'));
@@ -44,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Aktualizacja statystyk na bieżąco
     const updateStats = () => {
         const text = mainTextarea.value;
         const calculatedStats = Utils.calculateStats(text);
@@ -55,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Logika Funkcji ---
-
     const applyTransformation = (featureName) => {
         const text = mainTextarea.value;
         let newText = text;
@@ -99,15 +121,14 @@ document.addEventListener('DOMContentLoaded', () => {
             mainTextarea.value = newText;
             updateStats();
         } catch(error) {
-            console.error(`Błąd podczas transformacji "${featureName}":`, error);
-            // Można dodać powiadomienie dla użytkownika
+            console.error(`Error during transformation "${featureName}":`, error);
         }
     };
 
-    // --- Nasłuchiwacze zdarzeń (Event Listeners) ---
-
+    // --- Nasłuchiwacze zdarzeń ---
     mainTextarea.addEventListener('input', updateStats);
-
+    themeSwitcher.addEventListener('click', toggleTheme);
+    
     applyButtons.forEach(button => {
         button.addEventListener('click', () => {
             applyTransformation(button.dataset.feature);
@@ -117,11 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
     clearButton.addEventListener('click', () => {
         mainTextarea.value = '';
         updateStats();
-        saveText(); // Czyści również zapisany stan
+        saveText();
     });
     
     saveButton.addEventListener('click', saveText);
 
-    // Inicjalizacja
+    // --- Inicjalizacja ---
+    loadTheme();
     loadText();
 });
+
