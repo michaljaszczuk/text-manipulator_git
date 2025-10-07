@@ -246,6 +246,11 @@ button:hover {
     background-color: var(--button-hover-bg);
 }
 
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .apply-btn {
     background-color: var(--primary-color);
     color: var(--bg-color); /* High contrast text */

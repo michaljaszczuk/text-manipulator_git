@@ -6,9 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyButtons = document.querySelectorAll('.apply-btn');
     const clearButton = document.getElementById('clear-text-btn');
     const saveButton = document.getElementById('save-text-btn');
+    const undoButton = document.getElementById('undo-btn'); // Nowy przycisk
     const themeSwitcher = document.getElementById('theme-switcher');
     const sunIcon = document.getElementById('theme-icon-sun');
     const moonIcon = document.getElementById('theme-icon-moon');
+
+    // Historia zmian dla funkcji undo
+    let textHistory = [];
+    const MAX_HISTORY_SIZE = 5;
 
     const stats = {
         chars: document.getElementById('stat-chars'),
@@ -16,6 +21,38 @@ document.addEventListener('DOMContentLoaded', () => {
         lines: document.getElementById('stat-lines'),
         sentences: document.getElementById('stat-sentences'),
     };
+
+    // --- Zarządzanie historią (Undo) ---
+    const saveState = () => {
+        const currentText = mainTextarea.value;
+        // Zapisz tylko jeśli tekst się zmienił
+        if (textHistory.length === 0 || textHistory[textHistory.length - 1] !== currentText) {
+            textHistory.push(currentText);
+            if (textHistory.length > MAX_HISTORY_SIZE) {
+                textHistory.shift(); // Usuń najstarszy element
+            }
+        }
+        updateUndoButton();
+    };
+
+    const undoLastChange = () => {
+        if (textHistory.length > 0) {
+            // Zapisz bieżący stan, aby można go było cofnąć
+            saveState(); 
+            // Usuń bieżący stan z historii, aby wrócić do poprzedniego
+            textHistory.pop(); 
+            
+            const previousText = textHistory.length > 0 ? textHistory[textHistory.length - 1] : '';
+            mainTextarea.value = previousText;
+            updateStats();
+        }
+        updateUndoButton();
+    };
+
+    const updateUndoButton = () => {
+        undoButton.disabled = textHistory.length === 0;
+    };
+
 
     // --- Zarządzanie motywem ---
     const setTheme = (theme) => {
@@ -49,6 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.savedText) {
                 mainTextarea.value = result.savedText;
                 updateStats();
+                // Po załadowaniu tekstu zapisz stan początkowy
+                saveState();
             }
         });
     };
@@ -79,6 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Logika Funkcji ---
     const applyTransformation = (featureName) => {
+        // Zapisz stan przed transformacją
+        saveState();
         const text = mainTextarea.value;
         let newText = text;
 
@@ -120,6 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             mainTextarea.value = newText;
             updateStats();
+            // Zapisz stan po transformacji
+            saveState();
         } catch(error) {
             console.error(`Error during transformation "${featureName}":`, error);
         }
@@ -128,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Nasłuchiwacze zdarzeń ---
     mainTextarea.addEventListener('input', updateStats);
     themeSwitcher.addEventListener('click', toggleTheme);
+    undoButton.addEventListener('click', undoLastChange);
     
     applyButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -136,9 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     clearButton.addEventListener('click', () => {
+        saveState();
         mainTextarea.value = '';
         updateStats();
         saveText();
+        saveState();
     });
     
     saveButton.addEventListener('click', saveText);
@@ -146,5 +192,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Inicjalizacja ---
     loadTheme();
     loadText();
+    updateUndoButton(); // Ustaw stan przycisku na starcie
 });
-
