@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Manipulator</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Text Manipulator</h1>
+            <div class="storage-buttons">
+                <button id="save-text-btn" title="Save text">Save</button>
+                <button id="clear-text-btn" title="Clear all">Clear</button>
+            </div>
+        </header>
+
+        <main>
+            <textarea id="main-textarea" placeholder="Paste or type your text here..."></textarea>
+            <div id="stats-panel">
+                <span>Chars: <strong id="stat-chars">0</strong></span>
+                <span>Words: <strong id="stat-words">0</strong></span>
+                <span>Lines: <strong id="stat-lines">0</strong></span>
+                <span>Sentences: <strong id="stat-sentences">0</strong></span>
+            </div>
+        </main>
+
+        <div class="tabs">
+            <div class="tab-nav">
+                <button class="tab-link active" data-tab="tab-edit">Line Edit</button>
+                <button class="tab-link" data-tab="tab-clean">Cleaning</button>
+                <button class="tab-link" data-tab="tab-find">Find & Replace</button>
+            </div>
+
+            <div id="tab-edit" class="tab-content active">
+                <div class="feature-group">
+                    <label>Add Prefix/Suffix</label>
+                    <div class="input-row">
+                        <input type="text" id="prefix-input" placeholder="Prefix">
+                        <input type="text" id="suffix-input" placeholder="Suffix">
+                    </div>
+                    <button class="apply-btn" data-feature="addPrefixSuffix">Apply</button>
+                </div>
+                <div class="feature-group">
+                    <label>Join lines with separator</label>
+                    <input type="text" id="join-separator-input" placeholder="Separator (e.g., space, comma)">
+                    <button class="apply-btn" data-feature="joinLines">Apply</button>
+                </div>
+                 <div class="feature-group">
+                    <label>Extract column</label>
+                    <div class="input-row">
+                        <input type="text" id="extract-delimiter-input" placeholder="Delimiter" value=",">
+                        <input type="number" id="extract-index-input" placeholder="Column index (from 0)" value="0" min="0">
+                    </div>
+                    <button class="apply-btn" data-feature="extractColumn">Apply</button>
+                </div>
+            </div>
+
+            <div id="tab-clean" class="tab-content">
+                <div class="feature-grid">
+                    <button class="apply-btn" data-feature="removeDuplicateLines">Remove duplicate lines</button>
+                    <button class="apply-btn" data-feature="removeEmptyLines">Remove empty lines</button>
+                    <button class="apply-btn" data-feature="trimLines">Trim lines</button>
+                    <button class="apply-btn" data-feature="removeExtraWhitespace">Remove extra whitespace</button>
+                </div>
+            </div>
+
+            <div id="tab-find" class="tab-content">
+                <div class="feature-group">
+                    <label>Find text</label>
+                    <input type="text" id="find-input" placeholder="Text to find or /regex/">
+                    <label>Replace with</label>
+                    <input type="text" id="replace-input" placeholder="Replacement text">
+                     <div class="options">
+                        <label><input type="checkbox" id="regex-checkbox"> Regex</label>
+                        <label><input type="checkbox" id="case-sensitive-checkbox"> Case sensitive</label>
+                    </div>
+                    <button class="apply-btn" data-feature="findAndReplace">Replace all</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/utils.js"></script>
+    <script src="js/features.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>
+
