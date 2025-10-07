@@ -251,6 +251,35 @@ button:disabled {
     cursor: not-allowed;
 }
 
+/* Add these new styles to your popup.css file */
+
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    visibility: hidden;
+    width: 80px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 0%; /* Position the tooltip above the button */
+    left: 50%;
+    margin-left: -40px; /* Use half of the width to center the tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip.show {
+    visibility: visible;
+    opacity: 1;
+}
+
 .apply-btn {
     background-color: var(--primary-color);
     color: var(--bg-color); /* High contrast text */

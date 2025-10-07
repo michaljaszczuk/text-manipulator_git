@@ -5,11 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabContents = document.querySelectorAll('.tab-content');
     const applyButtons = document.querySelectorAll('.apply-btn');
     const clearButton = document.getElementById('clear-text-btn');
-    const saveButton = document.getElementById('save-text-btn');
-    const undoButton = document.getElementById('undo-btn'); // Nowy przycisk
+    const copyButton = document.getElementById('copy-text-btn'); // Zmieniono z saveButton
+    const undoButton = document.getElementById('undo-btn');
     const themeSwitcher = document.getElementById('theme-switcher');
     const sunIcon = document.getElementById('theme-icon-sun');
     const moonIcon = document.getElementById('theme-icon-moon');
+    const copyTooltip = document.getElementById('copy-tooltip');
 
     // Historia zmian dla funkcji undo
     let textHistory = [];
@@ -38,10 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const undoLastChange = () => {
         if (textHistory.length > 0) {
             // Zapisz bieżący stan, aby można go było cofnąć
-            saveState(); 
+            saveState();
             // Usuń bieżący stan z historii, aby wrócić do poprzedniego
-            textHistory.pop(); 
-            
+            textHistory.pop();
+
             const previousText = textHistory.length > 0 ? textHistory[textHistory.length - 1] : '';
             mainTextarea.value = previousText;
             updateStats();
@@ -92,16 +93,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const saveText = () => {
-        chrome.storage.local.set({ savedText: mainTextarea.value });
+    // --- Nowa funkcja kopiowania ---
+    const copyTextToClipboard = () => {
+        const textToCopy = mainTextarea.value;
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showTooltip();
+            }).catch(err => {
+                console.error('Błąd podczas kopiowania tekstu: ', err);
+            });
+        } else {
+            // Fallback dla starszych przeglądarek
+            const textArea = document.createElement("textarea");
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showTooltip();
+            } catch (err) {
+                console.error('Błąd podczas kopiowania tekstu (fallback): ', err);
+            }
+            document.body.removeChild(textArea);
+        }
     };
+
+    const showTooltip = () => {
+        copyTooltip.classList.add('show');
+        setTimeout(() => {
+            copyTooltip.classList.remove('show');
+        }, 1500); // Tooltip zniknie po 1.5 sekundy
+    };
+
 
     // --- Zarządzanie stanem UI ---
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            
+
             tabContents.forEach(content => content.classList.remove('active'));
             document.getElementById(tab.dataset.tab).classList.add('active');
         });
@@ -164,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Zapisz stan po transformacji
             saveState();
         } catch(error) {
-            console.error(`Error during transformation "${featureName}":`, error);
+            console.error(`Błąd podczas transformacji "${featureName}":`, error);
         }
     };
 
@@ -172,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mainTextarea.addEventListener('input', updateStats);
     themeSwitcher.addEventListener('click', toggleTheme);
     undoButton.addEventListener('click', undoLastChange);
-    
+
     applyButtons.forEach(button => {
         button.addEventListener('click', () => {
             applyTransformation(button.dataset.feature);
@@ -183,11 +214,11 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
         mainTextarea.value = '';
         updateStats();
-        saveText();
+        chrome.storage.local.set({ savedText: mainTextarea.value }); // Czyścimy zapisany tekst
         saveState();
     });
-    
-    saveButton.addEventListener('click', saveText);
+
+    copyButton.addEventListener('click', copyTextToClipboard); // Nowy event listener
 
     // --- Inicjalizacja ---
     loadTheme();
