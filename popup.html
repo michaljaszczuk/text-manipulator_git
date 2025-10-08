@@ -15,10 +15,7 @@
                     <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                 </button>
                 <button id="undo-btn" title="Undo last change" disabled>Undo</button>
-                <div class="tooltip-container">
-                    <button id="copy-text-btn" title="Copy text">Copy</button>
-                    <div id="copy-tooltip" class="tooltip">Copied to clipboard!</div>
-                </div>
+                <button id="save-text-btn" title="Save text">Save</button>
                 <button id="clear-text-btn" title="Clear all">Clear</button>
             </div>
         </header>
@@ -37,7 +34,7 @@
             <div class="tab-nav">
                 <button class="tab-link active" data-tab="tab-edit">Line Edit</button>
                 <button class="tab-link" data-tab="tab-clean">Cleaning</button>
-                <button class="tab-link" data-tab="tab-find">Find & Replace</button>
+                <button class="tab-link" data-tab="tab-sort">Sort</button> <button class="tab-link" data-tab="tab-find">Find & Replace</button>
             </div>
 
             <div id="tab-edit" class="tab-content active">
@@ -70,6 +67,17 @@
                     <button class="apply-btn" data-feature="removeEmptyLines">Remove empty lines</button>
                     <button class="apply-btn" data-feature="trimLines">Trim lines</button>
                     <button class="apply-btn" data-feature="removeExtraWhitespace">Remove extra whitespace</button>
+                </div>
+            </div>
+            
+            <div id="tab-sort" class="tab-content">
+                <div class="feature-grid">
+                    <button class="apply-btn" data-feature="sortAlphaAsc">Alphabetical (A-Z)</button>
+                    <button class="apply-btn" data-feature="sortAlphaDesc">Alphabetical (Z-A)</button>
+                    <button class="apply-btn" data-feature="sortNumAsc">Numerical (Asc)</button>
+                    <button class="apply-btn" data-feature="sortNumDesc">Numerical (Desc)</button>
+                    <button class="apply-btn" data-feature="sortLengthAsc">Line Length (Short-Long)</button>
+                    <button class="apply-btn" data-feature="sortLengthDesc">Line Length (Long-Short)</button>
                 </div>
             </div>
 

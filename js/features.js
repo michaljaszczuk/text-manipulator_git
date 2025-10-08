@@ -1,5 +1,45 @@
 const Features = {
     /**
+     * Helper function for sorting lines.
+     */
+    _sortLines(text, compareFunction) {
+        if (!text) return '';
+        return text.split('\n').sort(compareFunction).join('\n');
+    },
+
+    /**
+     * Sorts lines alphabetically.
+     */
+    sortAlphabetical(text, descending = false) {
+        return this._sortLines(text, (a, b) => {
+            const comparison = a.localeCompare(b);
+            return descending ? -comparison : comparison;
+        });
+    },
+
+    /**
+     * Sorts lines numerically.
+     */
+    sortNumerical(text, descending = false) {
+        return this._sortLines(text, (a, b) => {
+            const numA = parseFloat(a) || 0;
+            const numB = parseFloat(b) || 0;
+            const comparison = numA - numB;
+            return descending ? -comparison : comparison;
+        });
+    },
+
+    /**
+     * Sorts lines by length.
+     */
+    sortbyLength(text, descending = false) {
+        return this._sortLines(text, (a, b) => {
+            const comparison = a.length - b.length;
+            return descending ? -comparison : comparison;
+        });
+    },
+
+    /**
      * Dodaje prefix i/lub suffix do każdej linii.
      */
     addPrefixSuffix(text, prefix = '', suffix = '') {
