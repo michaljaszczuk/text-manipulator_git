@@ -251,8 +251,6 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* Add these new styles to your popup.css file */
-
 .tooltip-container {
     position: relative;
     display: inline-block;
@@ -312,4 +310,3 @@ button:disabled {
     stroke: var(--icon-color);
     transition: stroke 0.2s;
 }
-

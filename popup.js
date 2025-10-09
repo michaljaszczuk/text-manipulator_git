@@ -1,16 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Referencje do elementów DOM
     const mainTextarea = document.getElementById('main-textarea');
     const tabs = document.querySelectorAll('.tab-link');
     const tabContents = document.querySelectorAll('.tab-content');
     const applyButtons = document.querySelectorAll('.apply-btn');
     const clearButton = document.getElementById('clear-text-btn');
+    const copyButton = document.getElementById('copy-text-btn');
+    const copyTooltip = document.getElementById('copy-tooltip');
     const undoButton = document.getElementById('undo-btn');
     const themeSwitcher = document.getElementById('theme-switcher');
     const sunIcon = document.getElementById('theme-icon-sun');
     const moonIcon = document.getElementById('theme-icon-moon');
 
-    // --- State Management ---
+    let saveStateTimeout = null;
+    const debouncedSaveState = () => {
+        clearTimeout(saveStateTimeout);
+        saveStateTimeout = setTimeout(() => {
+            saveState();
+        }, 300);
+    };
+
     const saveState = () => {
         const activeTab = document.querySelector('.tab-link.active').dataset.tab;
         const state = {
@@ -44,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('regex-checkbox').checked = state.isRegex || false;
                 document.getElementById('case-sensitive-checkbox').checked = state.isCaseSensitive || false;
 
-                // Restore active tab
                 tabs.forEach(t => t.classList.remove('active'));
                 tabContents.forEach(c => c.classList.remove('active'));
                 const tabToActivate = document.querySelector(`.tab-link[data-tab="${state.activeTab}"]`) || document.querySelector('.tab-link');
@@ -52,11 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById(tabToActivate.dataset.tab).classList.add('active');
 
                 updateStats();
+                saveUndoState();
             }
         });
     };
 
-    // Historia zmian dla funkcji undo
     let textHistory = [];
     const MAX_HISTORY_SIZE = 5;
 
@@ -72,25 +79,30 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const undoLastChange = () => {
-        if (textHistory.length > 1) { // Need at least two states to undo
+        if (textHistory.length > 1) {
             textHistory.pop();
             mainTextarea.value = textHistory[textHistory.length - 1];
             updateStats();
-            saveState(); // Save the state after undo
-        } else if (textHistory.length === 1) {
-             textHistory.pop();
-             mainTextarea.value = '';
-             updateStats();
-             saveState();
+            saveState();
+            updateUndoButton();
         }
-        updateUndoButton();
     };
 
     const updateUndoButton = () => {
         undoButton.disabled = textHistory.length <= 1;
     };
 
-    // --- Zarządzanie motywem ---
+    const showError = (message) => {
+        const errorTooltip = document.createElement('div');
+        errorTooltip.className = 'error-tooltip';
+        errorTooltip.textContent = message;
+        errorTooltip.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f44336; color: white; padding: 12px 20px; border-radius: 4px; z-index: 10000; box-shadow: 0 2px 8px rgba(0,0,0,0.2);';
+        document.body.appendChild(errorTooltip);
+        setTimeout(() => {
+            errorTooltip.remove();
+        }, 3000);
+    };
+
     const setTheme = (theme) => {
         document.body.setAttribute('data-theme', theme);
         if (theme === 'dark') {
@@ -116,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- Zarządzanie stanem UI ---
     const stats = {
         chars: document.getElementById('stat-chars'),
         words: document.getElementById('stat-words'),
@@ -128,9 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
         tab.addEventListener('click', () => {
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
+            
             tabContents.forEach(content => content.classList.remove('active'));
             document.getElementById(tab.dataset.tab).classList.add('active');
-            saveState(); // Save state on tab change
+            saveState();
         });
     });
 
@@ -143,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
         stats.sentences.textContent = calculatedStats.sentences;
     };
 
-    // --- Logika Funkcji ---
     const applyTransformation = (featureName) => {
         saveUndoState();
         const text = mainTextarea.value;
@@ -205,27 +216,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             mainTextarea.value = newText;
             updateStats();
-            saveUndoState();
-            saveState(); // Save state after transformation
+            saveState();
         } catch(error) {
             console.error(`Error during transformation "${featureName}":`, error);
+            showError(`Error: ${error.message || 'Transformation failed'}`);
         }
     };
 
-    // --- Nasłuchiwacze zdarzeń ---
     mainTextarea.addEventListener('input', () => {
         updateStats();
-        saveUndoState();
-        saveState();
+        debouncedSaveState();
     });
 
-    // Add event listeners for all inputs to save state
     const inputsToSave = [
         'prefix-input', 'suffix-input', 'join-separator-input',
         'extract-delimiter-input', 'extract-index-input', 'find-input', 'replace-input'
     ];
     inputsToSave.forEach(id => {
-        document.getElementById(id).addEventListener('input', saveState);
+        document.getElementById(id).addEventListener('input', debouncedSaveState);
     });
     const checkboxesToSave = ['regex-checkbox', 'case-sensitive-checkbox'];
     checkboxesToSave.forEach(id => {
@@ -234,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     themeSwitcher.addEventListener('click', toggleTheme);
     undoButton.addEventListener('click', undoLastChange);
-
+    
     applyButtons.forEach(button => {
         button.addEventListener('click', () => {
             applyTransformation(button.dataset.feature);
@@ -245,13 +253,24 @@ document.addEventListener('DOMContentLoaded', () => {
         saveUndoState();
         mainTextarea.value = '';
         updateStats();
-        saveUndoState();
         saveState();
     });
+    
+    copyButton.addEventListener('click', () => {
+        const textToCopy = mainTextarea.value;
+        if (textToCopy) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                copyTooltip.classList.add('show');
+                setTimeout(() => {
+                    copyTooltip.classList.remove('show');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                showError('Failed to copy text to clipboard');
+            });
+        }
+    });
 
-    // --- Inicjalizacja ---
     loadTheme();
     loadState();
-    // Initial save of undo state
-    mainTextarea.addEventListener('focus', () => saveUndoState(), { once: true });
 });
